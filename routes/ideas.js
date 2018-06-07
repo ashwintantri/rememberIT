@@ -2,24 +2,35 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 require('../models/Idea');
+
+const {ensureAuthenticated} = require('../helper/auth');
 const Idea = mongoose.model('ideas');
-router.get('/edit/:id',(req,res) => 
+
+router.get('/edit/:id',ensureAuthenticated,(req,res) => 
             {
                 Idea.findOne(
                     {
                         _id:req.params.id
                     }).then(idea =>
                 {
-                    res.render('ideas/edit',{
-                        idea:idea
-                    });
+                    if(idea.user != req.user.id)
+                    {
+                        req.flash("error_msg","Not authorised!");
+                        res.redirect('/ideas');
+                    }
+                    else
+                    {
+                        res.render('ideas/edit',{
+                            idea:idea
+                        });
+                    }
                 })
                 
             });
 
-router.get('/',(req,res) => 
+router.get('/',ensureAuthenticated,(req,res) => 
             {
-                Idea.find({}).sort({date:'desc'}).
+                Idea.find({user:req.user.id}).sort({date:'desc'}).
                 then(ideas => {
                     res.render('ideas/index',
                                 {
@@ -30,12 +41,12 @@ router.get('/',(req,res) =>
                 
             });
 
-router.get('/add',(req,res) => 
+router.get('/add',ensureAuthenticated ,(req,res) => 
             {
                 res.render('ideas/add');
             });
 
-router.post('/',(req,res) =>
+router.post('/',ensureAuthenticated,(req,res) =>
             {  
                 let errors = [];
                 if(!req.body.title)
@@ -59,7 +70,8 @@ router.post('/',(req,res) =>
                 {
                     const newUser = {
                                         title:req.body.title,
-                                        details:req.body.details
+                                        details:req.body.details,
+                                        user:req.user.id
                                     }
                     new Idea(newUser).save()
                     .then(idea => 
@@ -70,7 +82,7 @@ router.post('/',(req,res) =>
                 }
             });
 
-router.put('/:id',(req,res)=>
+router.put('/:id',ensureAuthenticated,(req,res)=>
                                 {
                                     Idea.findOne({
                                         _id:req.params.id
@@ -83,7 +95,7 @@ router.put('/:id',(req,res)=>
                                         })
                                 });
                                 });
-router.delete('/:id',(req,res)=>
+router.delete('/:id',ensureAuthenticated,(req,res)=>
                                 {
                                     Idea.remove({
                                         _id:req.params.id

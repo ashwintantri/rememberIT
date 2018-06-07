@@ -7,11 +7,13 @@ const methodOverride = require('method-override');
 const ideas = require('./routes/ideas');
 const users = require('./routes/users');
 const flash = require('connect-flash');
+const passport = require('passport');
+const db = require('./config/database');
 const session = require('express-session');
 const app = express();
 
 
-mongoose.connect('mongodb://localhost/reformITdev')
+mongoose.connect(db.mongoURI)
 .then(()=>
             console.log('MongoDB connected.')
         ).catch(err => console.log(err));
@@ -24,11 +26,14 @@ app.use(bodyparser.json());
 
 app.use(methodOverride('_method'));
 
+require('./config/passport.js')(passport);
 app.use(session({
     secret:'secret',
     resave: true,
     saveUninitialized:true
 }));
+app.use(passport.initialize());
+app.use(passport.session());
 
 
 
@@ -38,7 +43,7 @@ app.use(function(req,res,next){
     res.locals.success_msg = req.flash('success_msg');
     res.locals.error_msg = req.flash('error_msg');
     res.locals.error = req.flash('error');
-    res.locals.user = res.user || null;
+    res.locals.user = req.user || null;
     next();
 });
 
@@ -56,7 +61,7 @@ app.get('/About',(req,res) =>
 
 app.use('/ideas',ideas);
 app.use('/users',users);
-const port = 5000;
+const port = process.env.PORT || 5000;
 
 app.listen(port, () =>
                 {

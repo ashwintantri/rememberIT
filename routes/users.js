@@ -35,7 +35,7 @@ router.post('/register', (req, res) => {
         }).then(user => {
             if (user) {
                 req.flash('error_msg', 'Email already registered!');
-                res.redirect('/users/register')
+                res.redirect('/users/register');
             } else {
                 const newUser = new User({
                     name: req.body.name,
@@ -68,5 +68,11 @@ router.post('/login', (req, res, next) => {
         failureRedirect: '/users/login',
         failureFlash: true
     })(req, res, next);
+});
+
+router.get('/logout',(req,res)=>{
+    req.logout();
+    req.flash('success_msg','Logged out!');
+    res.redirect('/users/login');
 });
 module.exports = router;

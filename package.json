@@ -4,7 +4,7 @@
   "description": "App to present new ideas or features to be implemented on smartphones.",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node app.js"
   },
   "author": "Ashwin Tantri",
   "license": "ISC",
