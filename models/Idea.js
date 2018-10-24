@@ -7,7 +7,7 @@ const IdeaSchema = new Schema(
                             title:
                             {
                                 type: String,
-                                required: true
+                                required: false
                             },
                             details:
                             {
